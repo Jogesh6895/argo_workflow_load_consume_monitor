@@ -58,7 +58,7 @@ Run individual workflows manually (requires accessible Redis instance):
 # Set environment variables (or use .env file)
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
-export REDIS_PASSWORD=your_redis_password
+export REDIS_PASSWORD=<your_redis_password>
 
 # Test job loader
 python workflows/redis_job_loader_workflow/redis_job_loader.py
@@ -93,6 +93,20 @@ cp .env.example .env
 # Source the environment file
 export $(cat .env | xargs)
 ```
+
+## Security
+
+**Important:** This project is designed to be safe for public repositories. No sensitive data is hardcoded in the code.
+
+- All credentials are loaded from environment variables
+- `.env` file is excluded from git (see `.gitignore:41-42`)
+- Only `.env.example` template is committed with placeholder values
+- Scripts validate that `REDIS_PASSWORD` is set before execution
+
+When deploying:
+- Use Kubernetes secrets or config maps for environment variables
+- Never commit actual credentials to the repository
+- Rotate Redis passwords regularly
 
 ## Redis Key Naming
 
