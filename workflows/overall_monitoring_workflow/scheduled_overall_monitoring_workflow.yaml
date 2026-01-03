@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: overall-monitoring-argo-workflow
+  namespace: argo
+  labels:
+    project: demo
+spec:
+  workflowMetadata:
+    labels:
+      project: demo
+  concurrencyPolicy: Allow
+  schedule: '*/5 * * * *'
+  startingDeadlineSeconds: 0
+  timezone: Asia/Calcutta
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: main
+        steps:
+          - - name: monitor-main
+              template: monitor-executor
+              arguments:
+                parameters:
+                - name: element
+                  value: "{{item}}"
+              withItems:
+              - "job_loader"
+              - "job_consumer"
+      - name: monitor-executor
+        inputs:
+          parameters:
+          - name: element
+        dag:
+          tasks:
+          - name: job-loader-status
+            template: check-job-loader-status
+            when: "{{inputs.parameters.element}} == job_loader"
+            arguments:
+              parameters:
+              - name: pattern
+                value: "ARGO_STATUS:JOB_LOADER:"
+              - name: check
+                value: "{{item}}"
+            withItems:
+              - "current"
+              - "previous"
+          - name: job-consumer-status
+            template: check-job-consumer-status
+            when: "{{inputs.parameters.element}} == job_consumer"
+            arguments:
+              parameters:
+              - name: pattern
+                value: "ARGO_STATUS:JOB_CONSUMER:"
+              - name: check
+                value: "{{item}}"
+            withItems:
+              - "current"
+              - "previous"
+      - name: check-job-loader-status
+        inputs:
+          parameters:
+          - name: pattern
+          - name: check
+        container:
+          name: job-loader-status-container
+          image: argo_workflows:v2.2.7
+          command: ["python", "overall_monitoring_workflow/overall_monitoring.py"]
+          args: [
+            "--pattern", "{{inputs.parameters.pattern}}",
+            "--check", "{{inputs.parameters.check}}"
+          ]
+      - name: check-job-consumer-status
+        inputs:
+          parameters:
+          - name: pattern
+          - name: check
+        container:
+          name: job-consumer-status-container
+          image: argo_workflows:v2.2.7
+          command: ["python", "overall_monitoring_workflow/overall_monitoring.py"]
+          args: [
+            "--pattern", "{{inputs.parameters.pattern}}",
+            "--check", "{{inputs.parameters.check}}"
+          ]
+    # ttlStrategy:
+    #   secondsAfterCompletion: 1296000  # 15 Days
+    #   secondsAfterSuccess: 1296000     # 15 Days
+    #   secondsAfterFailure: 1296000     # 15 Days

@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: redis-job-consumer-argo-workflow
+  namespace: argo
+  labels:
+    project: demo
+spec:
+  workflowMetadata:
+    labels:
+      project: demo
+  concurrencyPolicy: Allow
+  schedule: '*/1 * * * *'
+  startingDeadlineSeconds: 0
+  timezone: Asia/Calcutta
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: run-redis-job-consumer
+        container:
+          name: redis_job_consumer
+          image: argo_workflows:v2.2.7
+          command: ["python", "redis_job_consumer_workflow/redis_job_consumer.py"]
+      - name: main
+        steps:
+          - - name: redis-job-consumer
+              template: run-redis-job-consumer
+    # ttlStrategy:
+    #   secondsAfterCompletion: 1296000  # 15 Days
+    #   secondsAfterSuccess: 1296000     # 15 Days
+    #   secondsAfterFailure: 1296000     # 15 Days

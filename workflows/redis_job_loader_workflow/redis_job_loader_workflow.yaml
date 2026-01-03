@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: redis-job-loader-argo-workflow-20250314-9
+spec:
+  entrypoint: main
+  templates:
+    - name: run-redis-job-loader
+      container:
+        name: redis_job_loader
+        image: argo_workflows:v2.2.7
+        command: ["python", "redis_job_loader_workflow/redis_job_loader.py"]
+    - name: main
+      steps:
+        - - name: redis-job-loader
+            template: run-redis-job-loader

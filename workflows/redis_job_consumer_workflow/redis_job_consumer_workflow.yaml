@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: redis-job-consumer-argo-workflow-20240314-9
+spec:
+  entrypoint: main
+  templates:
+    - name: run-redis-job-consumer
+      container:
+        name: redis_job_consumer
+        image: argo_workflows:v2.2.7
+        command: ["python", "redis_job_consumer_workflow/redis_job_consumer.py"]
+    - name: main
+      steps:
+        - - name: redis-job-consumer
+            template: run-redis-job-consumer

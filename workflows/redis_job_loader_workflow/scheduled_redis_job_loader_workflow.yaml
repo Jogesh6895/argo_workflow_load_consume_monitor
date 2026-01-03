@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: redis-job-loader-argo-workflow
+  namespace: argo
+  labels:
+    project: demo
+spec:
+  workflowMetadata:
+    labels:
+      project: demo
+  concurrencyPolicy: Allow
+  schedule: '*/3 * * * *'
+  startingDeadlineSeconds: 0
+  timezone: Asia/Calcutta
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: run-redis-job-loader
+        container:
+          name: redis_job_loader
+          image: argo_workflows:v2.2.7
+          command: ["python", "redis_job_loader_workflow/redis_job_loader.py"]
+      - name: main
+        steps:
+          - - name: redis-job-loader
+              template: run-redis-job-loader
+    # ttlStrategy:
+    #   secondsAfterCompletion: 1296000  # 15 Days
+    #   secondsAfterSuccess: 1296000     # 15 Days
+    #   secondsAfterFailure: 1296000     # 15 Days
