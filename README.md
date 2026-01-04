@@ -130,6 +130,14 @@ When deploying:
 3. **Error handling**: Only prints errors, no proper logging
 4. **Old CLI library**: Uses `optparse` instead of `argparse`
 
-## License
+## 📄 License
 
-This project is a demonstration/prototype.
+This project is a open source demonstration/prototype project and is available under the [MIT License](LICENSE).
+
+## 👨‍💻 Author
+
+**Jogesh Kumar Ghadai**
+- Email: jogesh6895@gmail.com
+- GitHub: [@Jogesh6895](https://github.com/Jogesh6895)
+
+---
